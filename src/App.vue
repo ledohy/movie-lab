@@ -78,7 +78,7 @@ onBeforeUnmount(() => { requestId++; controller?.abort() })
     <section class="hero" aria-labelledby="hero-title">
       <p class="eyebrow">LIVE MOVIE DATA FROM TMDB</p>
       <h1 id="hero-title">Your next story<br>starts here.</h1>
-      <p>Browse popular movies from TMDB.</p>
+      <p>Browse popular movies and search the TMDB catalog.</p>
       <form v-if="!apiKey" class="key-form" @submit.prevent="connect">
         <label for="tmdb-key">TMDB API Key (v3)</label>
         <div class="search-field"><input id="tmdb-key" v-model="draftKey" type="password"
@@ -87,7 +87,15 @@ onBeforeUnmount(() => { requestId++; controller?.abort() })
         <p class="key-help">Used only in this tab’s memory. Reloading clears it.
           <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Get your key</a></p>
       </form>
-      <div v-else class="connection-actions"><button :disabled="loading" @click="popular">Reload popular movies</button><button @click="disconnect">Clear / change key</button></div>
+      <template v-else>
+        <form class="search-form" role="search" @submit.prevent="search">
+          <label for="movie-query">Search movie titles</label>
+          <div class="search-field"><input id="movie-query" v-model="query" type="search"
+            placeholder="Try a movie title…" autocomplete="off"><button :disabled="loading" type="submit">Search</button></div>
+        </form>
+        <div class="connection-actions"><button type="button" :disabled="loading" @click="popular">Popular movies</button>
+          <button type="button" @click="disconnect">Clear / change key</button></div>
+      </template>
     </section>
     <section id="movies" class="catalog" aria-labelledby="catalog-title" :aria-busy="loading">
       <div class="section-heading"><div><p class="eyebrow">THE MOVIE DATABASE</p>
@@ -95,7 +103,7 @@ onBeforeUnmount(() => { requestId++; controller?.abort() })
       <div v-if="!apiKey" class="empty-state"><h3>Connect to TMDB</h3><p>Enter your API Key (v3) above to load real movies.</p></div>
       <p v-else-if="loading" class="status-box" role="status">Loading movies from TMDB…</p>
       <div v-else-if="error" class="status-box error" role="alert"><h3>Could not load movies</h3><p>{{ error }}</p>
-        <button @click="popular">Retry popular movies</button></div>
+        <button @click="search">Retry current search</button></div>
       <template v-else>
         <p class="result-count" role="status">{{ totalResults }} results · page {{ page }} · {{ movies.length }} shown</p>
         <div v-if="movies.length" class="movie-grid"><MovieCard v-for="movie in movies" :key="movie.id" :movie="movie" /></div>
